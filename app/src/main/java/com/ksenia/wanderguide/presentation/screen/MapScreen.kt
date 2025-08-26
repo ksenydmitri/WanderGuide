@@ -7,5 +7,5 @@ import androidx.navigation.NavController
 
 @Composable
 fun MapScreen(navController: NavController){
-    Text("Главный экран", style = MaterialTheme.typography.headlineMedium)
+    Text("Экран с картой", style = MaterialTheme.typography.headlineMedium)
 }

@@ -8,6 +8,7 @@ import com.ksenia.wanderguide.presentation.screen.CurrencyScreen
 import com.ksenia.wanderguide.presentation.screen.HomeScreen
 import com.ksenia.wanderguide.presentation.screen.MapScreen
 import com.ksenia.wanderguide.presentation.screen.MenuScreen
+import com.ksenia.wanderguide.presentation.screen.NotesScreen
 
 @Composable
 fun MainNavGraph(navController: NavHostController) {
@@ -26,6 +27,9 @@ fun MainNavGraph(navController: NavHostController) {
         }
         composable(Screen.Currency.route) {
             CurrencyScreen(navController)
+        }
+        composable(Screen.Notes.route) {
+            NotesScreen(navController)
         }
     }
 }

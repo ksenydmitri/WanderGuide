@@ -1,7 +1,9 @@
 package com.ksenia.wanderguide.presentation.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Share
@@ -36,9 +38,15 @@ sealed class Screen(
         icon = Icons.Default.Share
     )
 
+    object Notes : Screen(
+        route = "notes",
+        title = "Заметки",
+        icon =  Icons.Default.Done
+    )
+
     companion object {
         val MenuItems: List<Screen> by lazy {
-            listOf(Home, Menu, Map, Currency).also {
+            listOf(Home, Menu, Map, Currency, Notes).also {
                 require(it.all { item -> item.title.isNotBlank() }) {
                     "Все элементы меню должны иметь title"
                 }
