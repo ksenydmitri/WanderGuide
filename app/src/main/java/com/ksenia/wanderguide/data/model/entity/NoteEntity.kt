@@ -10,5 +10,5 @@ data class NoteEntity (
     val id: String,
     val text: String,
     val isCompleted: Boolean,
-    val createdAt: LocalDateTime
+    val createdAt: String
 )

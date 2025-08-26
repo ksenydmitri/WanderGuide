@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.ksenia.wanderguide.presentation.viewModel.CurrencyViewModel
@@ -25,7 +26,7 @@ fun CurrencyScreen(nanController: NavController){
 }
 
 @Composable
-fun AmountInputField(viewModel: CurrencyViewModel = viewModel()) {
+fun AmountInputField(viewModel: CurrencyViewModel = hiltViewModel()) {
     val amount = viewModel.amount.value
 
     TextField(

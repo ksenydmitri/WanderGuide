@@ -1,30 +1,46 @@
 package com.ksenia.wanderguide.presentation.viewModel
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ksenia.wanderguide.domain.model.Note
 import com.ksenia.wanderguide.domain.repository.NotesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class NotesViewModel@Inject constructor(
+class NotesViewModel @Inject constructor (
     private val repository: NotesRepository
-): ViewModel() {
+) : ViewModel() {
 
-    val notes = MutableLiveData<List<Note>>()
+    private val _notes = MutableStateFlow<List<Note>>(emptyList())
+    val notes: StateFlow<List<Note>> = _notes
+
+    init {
+        loadNotes()
+    }
 
     fun loadNotes() {
         viewModelScope.launch {
-            val result = repository.fetchNotes()
-            notes.postValue(result)
+            _notes.value = repository.fetchNotes()
         }
     }
 
-    fun updateNoteCompletion(id: String, newState: Boolean){
+    fun addNote() {
+        viewModelScope.launch {
+            repository.addNote()
+            loadNotes()
+        }
+    }
 
+    fun toggleNoteCompletion(note: Note) {
+        viewModelScope.launch {
+            val updatedNote = note.copy(isCompleted = !note.isCompleted)
+            repository.updateNote(updatedNote)
+            loadNotes()
+        }
     }
 
 }

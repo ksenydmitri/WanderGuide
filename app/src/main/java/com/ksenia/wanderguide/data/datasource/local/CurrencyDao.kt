@@ -12,6 +12,6 @@ interface CurrencyDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveRates(rates: List<CurrencyRate>)
     
-    @Query("SELECT currency, rate FROM CurrencyRate ORDER BY date DESC LIMIT 1")
+    @Query("SELECT * FROM CurrencyRate ORDER BY date DESC LIMIT 1")
     suspend fun getCachedRates(): List<CurrencyRate>
 }

@@ -1,53 +1,69 @@
 package com.ksenia.wanderguide.presentation.screen
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ksenia.wanderguide.domain.model.Note
-import kotlinx.coroutines.NonCancellable.isCompleted
+import com.ksenia.wanderguide.presentation.viewModel.NotesViewModel
 
 @Composable
-fun NotesScreen(navController: NavController){
-    Column(
-        Modifier
-            .fillMaxWidth()
-    ) {
+fun NotesScreen(navController: NavController, viewModel: NotesViewModel = hiltViewModel()) {
+    val notes by viewModel.notes.collectAsState()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            NotesList(notes = notes, onToggle = { viewModel.toggleNoteCompletion(it) })
+        }
+
+        Button(
+            onClick = { viewModel.addNote() },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add")
+        }
     }
+
+
 }
 
 @Composable
-fun NotesList(navController: NavController, notes: List<Note>) {
+fun NotesList(notes: List<Note>, onToggle: (Note) -> Unit) {
     LazyColumn {
-        items(notes, key = { it.id }) { note ->
+        items(notes.size) { note ->
             NoteListItem(
-                isCompleted = note.isCompleted,
-                text = note.text,
-                onCheckedChange = { newState ->
-                    viewModel.updateNoteCompletion(note.id, newState)
-                },
-                onTextClick = {
-                    navController.navigate("editNote/${note.id}")
-                }
-            )
+                isCompleted = notes[note].isCompleted,
+                text = notes[note].text,
+                onCheckedChange = { onToggle(notes[note]) })
         }
     }
 }

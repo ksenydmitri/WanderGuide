@@ -4,10 +4,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.ksenia.wanderguide.data.model.entity.CurrencyRate
+import com.ksenia.wanderguide.data.model.entity.NoteEntity
 
 @Database(
-    entities = [CurrencyRate::class],
-    version = 1,
+    entities = [CurrencyRate::class, NoteEntity::class],
+    version = 2,
     exportSchema = false
 )
 @TypeConverters
