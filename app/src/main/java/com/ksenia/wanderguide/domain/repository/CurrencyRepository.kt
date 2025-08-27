@@ -1,7 +1,9 @@
 package com.ksenia.wanderguide.domain.repository
 
-import com.ksenia.wanderguide.domain.model.Rate
+import com.ksenia.wanderguide.domain.model.CurrencyRate
+import kotlinx.coroutines.flow.Flow
 
 interface CurrencyRepository {
-    suspend fun fetchRates(base: String): List<Rate>
+    fun getCurrencyRates(): Flow<List<CurrencyRate>>
+    suspend fun refreshRatesFromApi()
 }

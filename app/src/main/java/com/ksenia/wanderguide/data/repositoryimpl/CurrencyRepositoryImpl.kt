@@ -2,41 +2,38 @@ package com.ksenia.wanderguide.data.repositoryimpl
 
 import com.ksenia.wanderguide.data.datasource.local.CurrencyDao
 import com.ksenia.wanderguide.data.datasource.remote.CurrencyApi
-import com.ksenia.wanderguide.data.model.entity.CurrencyRate
-import com.ksenia.wanderguide.domain.model.Rate
+import com.ksenia.wanderguide.data.model.entity.CurrencyRateEntity
+import com.ksenia.wanderguide.domain.model.CurrencyRate
 import com.ksenia.wanderguide.domain.repository.CurrencyRepository
-import java.time.LocalDate
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class CurrencyRepositoryImpl@Inject constructor(
-    private val dao: CurrencyDao,
-    private val api: CurrencyApi
-): CurrencyRepository {
+    private val api: CurrencyApi,
+    private val dao: CurrencyDao
+) : CurrencyRepository {
 
-    override suspend fun fetchRates(base: String): List<Rate> {
-        return try {
-            val response = api.getRates(base)
-            val entityList = response.rates.map { (currency, rate) ->
+    override fun getCurrencyRates(): Flow<List<CurrencyRate>> {
+        return dao.getRatesFlow()
+            .map { entities -> entities.map{ it ->
                 CurrencyRate(
-                    currency = currency,
-                    rate = rate,
-                    date = LocalDate.now().toString())
-            }
-            dao.saveRates(entityList)
-            response.rates.map { (currency, rate)  ->
-                Rate(
-                    currency = rate,
-                    code = currency
+                    rateToBase = it.rate,
+                    code = it.currency
                 )
-            }
-        } catch (e: Exception) {
-            dao.getCachedRates().map { entry ->
-                Rate(
-                    currency = entry.rate,
-                    code = entry.currency
-                )
-            }
-        }
+            } }
     }
 
+    override suspend fun refreshRatesFromApi() {
+        val response = api.getRates()
+        val entities = response.currencyRates.map { (rateToBase, code) ->
+            CurrencyRateEntity(
+                currency = code,
+                rate = rateToBase,
+                date = LocalDateTime.now().toString())
+        }
+        dao.insertRates(entities)
+    }
 }

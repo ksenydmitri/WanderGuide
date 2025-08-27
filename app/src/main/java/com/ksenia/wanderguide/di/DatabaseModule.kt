@@ -29,7 +29,7 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideTrackDao(database: AppDatabase): CurrencyDao {
+    fun provideCurrencyDao(database: AppDatabase): CurrencyDao {
         return database.currencyDao()
     }
 

@@ -1,7 +1,9 @@
 package com.ksenia.wanderguide.data.model.dto
 
+import com.ksenia.wanderguide.domain.model.CurrencyRate
+
 data class CurrencyResponse(
     val base: String,
     val date: String,
-    val rates: Map<String, Double>
+    val currencyRates: List<CurrencyRate>
 )

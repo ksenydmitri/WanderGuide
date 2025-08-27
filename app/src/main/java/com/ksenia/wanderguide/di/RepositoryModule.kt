@@ -1,6 +1,7 @@
 package com.ksenia.wanderguide.di
 
 import com.ksenia.wanderguide.data.repositoryimpl.CurrencyRepositoryImpl
+import com.ksenia.wanderguide.data.repositoryimpl.FakeCurrencyRepositoryImpl
 import com.ksenia.wanderguide.data.repositoryimpl.NotesRepositoryImpl
 import com.ksenia.wanderguide.domain.repository.CurrencyRepository
 import com.ksenia.wanderguide.domain.repository.NotesRepository
@@ -15,7 +16,7 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindCurrencyRepository(
-        impl: CurrencyRepositoryImpl
+        impl: FakeCurrencyRepositoryImpl
     ): CurrencyRepository
 
     @Binds

@@ -1,6 +1,6 @@
 package com.ksenia.wanderguide.domain.model
 
-data class Rate(
-    val currency: Double,
+data class CurrencyRate(
+    val rateToBase: Double,
     val code: String
 )
