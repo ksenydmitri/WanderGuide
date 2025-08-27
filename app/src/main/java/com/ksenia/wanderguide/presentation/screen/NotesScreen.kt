@@ -1,6 +1,7 @@
 package com.ksenia.wanderguide.presentation.screen
 
-import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +24,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
@@ -40,7 +42,11 @@ fun NotesScreen(navController: NavController, viewModel: NotesViewModel = hiltVi
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            NotesList(notes = notes, onToggle = { viewModel.toggleNoteCompletion(it) })
+            NotesList(
+                notes = notes,
+                onToggle = { viewModel.toggleNoteCompletion(it) },
+                onTextUpdate = { note, newText -> viewModel.updateNoteText(note, newText) }
+            )
         }
 
         Button(
@@ -57,25 +63,39 @@ fun NotesScreen(navController: NavController, viewModel: NotesViewModel = hiltVi
 }
 
 @Composable
-fun NotesList(notes: List<Note>, onToggle: (Note) -> Unit) {
+fun NotesList(notes: List<Note>, onToggle: (Note) -> Unit, onTextUpdate: (Note, String) -> Unit) {
+    var editingNoteId by remember { mutableStateOf<String?>(null) }
+
     LazyColumn {
-        items(notes.size) { note ->
+        items(notes.size) { index ->
+            val note = notes[index]
             NoteListItem(
-                isCompleted = notes[note].isCompleted,
-                text = notes[note].text,
-                onCheckedChange = { onToggle(notes[note]) })
+                isCompleted = note.isCompleted,
+                text = note.text,
+                isEditing = editingNoteId == note.id,
+                onCheckedChange = { onToggle(note) },
+                onTextClick = { editingNoteId = note.id },
+                onTextChange = { newText ->
+                    onTextUpdate(note, newText)
+                    editingNoteId = null }
+            )
         }
     }
 }
+
 
 @Composable
 fun NoteListItem(
     modifier: Modifier = Modifier,
     isCompleted: Boolean,
     text: String,
+    isEditing: Boolean,
     onCheckedChange: ((Boolean) -> Unit)? = null,
     onTextClick: (() -> Unit)? = null,
+    onTextChange: ((String) -> Unit)? = null
 ) {
+    val localText = remember { mutableStateOf(text) }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -100,26 +120,34 @@ fun NoteListItem(
                 )
             )
 
-            Text(
-                text = text,
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { onTextClick?.invoke() },
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    textDecoration = if (isCompleted) {
-                        TextDecoration.LineThrough
-                    } else {
-                        TextDecoration.None
-                    }
-                ),
-                color = if (isCompleted) {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                },
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+            if (isEditing) {
+                androidx.compose.material3.TextField(
+                    value = localText.value,
+                    onValueChange = { localText.value = it },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true
+                )
+
+                Button(onClick = { onTextChange?.invoke(localText.value) }) {
+                    Text("Сохранить")
+                }
+            } else {
+                Text(
+                    text = text,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onTextClick?.invoke() },
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        textDecoration = if (isCompleted) TextDecoration.LineThrough else TextDecoration.None
+                    ),
+                    color = if (isCompleted)
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    else
+                        MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }

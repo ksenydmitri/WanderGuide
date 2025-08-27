@@ -5,6 +5,8 @@ import com.ksenia.wanderguide.data.datasource.local.NotesDao
 import com.ksenia.wanderguide.data.model.entity.NoteEntity
 import com.ksenia.wanderguide.domain.model.Note
 import com.ksenia.wanderguide.domain.repository.NotesRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
@@ -12,22 +14,6 @@ import javax.inject.Inject
 class NotesRepositoryImpl@Inject constructor(
     val notesDao: NotesDao
 ) : NotesRepository {
-    override suspend fun fetchNotes(): List<Note> {
-        try {
-            val notes = notesDao.getNotes().map { noteEntity ->
-                Note(
-                    id = noteEntity.id,
-                    text = noteEntity.text,
-                    isCompleted = noteEntity.isCompleted,
-                    createdAt = noteEntity.createdAt
-                )
-            }
-
-            return notes
-        } catch (e: Exception) {
-            throw e
-        }
-    }
 
     override suspend fun saveNotes(notes: List<Note>) {
         try {
@@ -71,5 +57,19 @@ class NotesRepositoryImpl@Inject constructor(
         } catch (e: Exception){
             throw e
         }
+    }
+
+    override fun getNotesFlow(): Flow<List<Note>> {
+        return notesDao.getNotesFlow()
+            .map { entityList ->
+                entityList.map { entity ->
+                    Note(
+                        id = entity.id,
+                        text = entity.text,
+                        isCompleted = entity.isCompleted,
+                        createdAt = entity.createdAt
+                    )
+                }
+            }
     }
 }

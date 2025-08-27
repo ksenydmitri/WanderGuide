@@ -5,33 +5,26 @@ import androidx.lifecycle.viewModelScope
 import com.ksenia.wanderguide.domain.model.Note
 import com.ksenia.wanderguide.domain.repository.NotesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
-class NotesViewModel @Inject constructor (
+class NotesViewModel @Inject constructor(
     private val repository: NotesRepository
 ) : ViewModel() {
 
-    private val _notes = MutableStateFlow<List<Note>>(emptyList())
-    val notes: StateFlow<List<Note>> = _notes
-
-    init {
-        loadNotes()
-    }
-
-    fun loadNotes() {
-        viewModelScope.launch {
-            _notes.value = repository.fetchNotes()
-        }
-    }
+    val notes: StateFlow<List<Note>> = repository.getNotesFlow()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     fun addNote() {
         viewModelScope.launch {
             repository.addNote()
-            loadNotes()
         }
     }
 
@@ -39,8 +32,16 @@ class NotesViewModel @Inject constructor (
         viewModelScope.launch {
             val updatedNote = note.copy(isCompleted = !note.isCompleted)
             repository.updateNote(updatedNote)
-            loadNotes()
         }
     }
 
+    fun updateNoteText(note: Note, newText: String) {
+        viewModelScope.launch {
+            val updatedNote = note.copy(
+                text = newText,
+                createdAt = LocalDateTime.now().toString()
+            )
+            repository.updateNote(updatedNote)
+        }
+    }
 }
