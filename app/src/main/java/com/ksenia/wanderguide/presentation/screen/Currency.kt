@@ -1,15 +1,16 @@
 package com.ksenia.wanderguide.presentation.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -22,14 +23,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.ksenia.wanderguide.domain.model.CurrencyRate
 import com.ksenia.wanderguide.presentation.viewModel.CurrencyViewModel
-import java.nio.file.WatchEvent
 
 @Composable
 fun CurrencyScreen(nanController: NavController){
@@ -45,28 +42,24 @@ fun CurrencyScreen(nanController: NavController){
         val converted = inputAmount * it.rateToBase / baseRate
         it.copy(rateToBase = converted)
     }
-    Column {
-        TextField(
-            value = amount,
-            onValueChange = { amount = it },
-            label = { Text("Сумма в $selectedCurrency") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        )
-
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF61C6C1))
+    ) {
         LazyColumn {
             items(convertedRates.size) { index ->
                 RateListItem(
                     currencyCode = convertedRates[index].code,
                     rate = convertedRates[index].rateToBase,
                     isSelected = convertedRates[index].code == selectedCurrency,
-                    onClick = { selectedCurrency = convertedRates[index].code }
+                    onClick = { selectedCurrency = convertedRates[index].code
+                              amount = convertedRates[index].rateToBase.toString()},
+                    onChange = { amount = it}
                 )
             }
         }
     }
-
 }
 
 @Composable
@@ -78,12 +71,15 @@ fun RateListItem(currencyCode: String,
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .fillMaxHeight(0.2f)
             .padding(8.dp)
+            .clickable(enabled = onClick != null) { onClick?.invoke() }
     ) {
+        var localRate by remember { mutableStateOf(rate.toString()) }
         Row(
             modifier = Modifier
-                .padding(vertical = 8.dp)
-
+                .padding(vertical = 8.dp),
+            Arrangement.SpaceBetween
         ) {
             Text(
                 currencyCode,
@@ -92,7 +88,18 @@ fun RateListItem(currencyCode: String,
                 color = Color.Gray,
                 fontWeight = FontWeight.Bold
             )
-            Text(rate.toString())
+            if (isSelected){
+
+                TextField(value = localRate,
+                    onValueChange = {
+                        localRate = it
+                        onChange?.invoke(it)
+                    },
+                    modifier = Modifier,
+                    singleLine = true)
+            } else {
+                Text(rate.toString())
+            }
         }
     }
 }
